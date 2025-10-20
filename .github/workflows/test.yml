@@ -1,0 +1,49 @@
+name: Test
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  parent:
+    name: Test Aggriggator
+    runs-on: ubuntu-latest
+    steps:
+      - name: Aggriggator NOP
+        run: true
+
+
+  test-standard-case:
+    name: Standard Case
+    needs: parent
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.8.13'
+
+      - name: Run standard test
+        run: python -u main.py < test_data/standard-case.txt 2>&1 | tee test_output.txt
+
+      - name: Validate output
+        run: cmp -s test_data/standard-case-expected-output.txt test_output.txt
+
+
+  test-malicious-input:
+    name: Malicious Input
+    needs: parent
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.8.13'
+
+      - name: Run malicious test
+        run: python -u main.py < test_data/malicious-input.txt 2>&1 | tee test_output.txt
+
+      - name: Validate output
+        run: cmp -s test_data/malicious-input-expected-output.txt test_output.txt
